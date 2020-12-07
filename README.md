@@ -2,7 +2,7 @@
 
 This is the Adafruit MAX31856 Arduino Library 
 
-<img src="https://raw.githubusercontent.com/GadgetAngel/Adafruit-MAX31865-V1.1.0-Mod-M/blob/master/images/3328-00.jpg?raw=true" />
+<img src="https://raw.githubusercontent.com/GadgetAngel/Adafruit-MAX31865-V1.1.0-Mod-M/master/images/3328-00.jpg?raw=true" />
 
 Tested and works great with the Adafruit Thermocouple Breakout w/MAX31856
    * http://www.adafruit.com/products/3328
