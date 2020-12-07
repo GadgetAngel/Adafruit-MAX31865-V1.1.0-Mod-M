@@ -46,7 +46,7 @@
 #define RTD_A 3.9083e-3
 #define RTD_B -5.775e-7
 
-//ga
+
 #if (ARDUINO >= 100 || ARDUINOLPC)
 #include "Arduino.h"
 #else
@@ -78,6 +78,7 @@ public:
   void enableBias(bool b);
 
   float temperature(float RTDnominal, float refResistor);
+  uint16_t readRTD_Resistance(void);
 
 private:
   int8_t _sclk, _miso, _mosi, _cs;

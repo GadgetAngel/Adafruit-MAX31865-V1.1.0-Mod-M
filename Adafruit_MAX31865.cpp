@@ -258,6 +258,37 @@ uint16_t Adafruit_MAX31865::readRTD(void) {
   return rtd;
 }
 
+/**************************************************************************/
+/*!
+    @brief Read the raw 16-bit value from the RTD_REG in one shot mode and
+    calucalte the RTD resistance value
+    @return The raw unsigned 16-bit RTD resistance value, NOT temperature!
+*/
+/**************************************************************************/
+uint16_t Adafruit_MAX31865::readRTD_Resistance(void) {
+
+  uint32_t Rt;
+
+  clearFault();
+  enableBias(true);
+  delay(10);
+  uint8_t t = readRegister8(MAX31856_CONFIG_REG);
+  t |= MAX31856_CONFIG_1SHOT;
+  writeRegister8(MAX31856_CONFIG_REG, t);
+  delay(65);
+
+  uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
+
+  // remove fault
+  rtd >>= 1;
+
+  Rt = rtd;
+  Rt *= refResistor;
+  Rt >> 16;
+
+  return Rt;
+}
+
 /**********************************************/
 
 uint8_t Adafruit_MAX31865::readRegister8(uint8_t addr) {
