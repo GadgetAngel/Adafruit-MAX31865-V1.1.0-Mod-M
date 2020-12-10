@@ -262,10 +262,12 @@ uint16_t Adafruit_MAX31865::readRTD(void) {
 /*!
     @brief Read the raw 16-bit value from the RTD_REG in one shot mode and
     calucalte the RTD resistance value
+    @param refResistor The value of the matching reference resistor, usually
+    430 or 4300    
     @return The raw unsigned 16-bit RTD resistance value, NOT temperature!
 */
 /**************************************************************************/
-uint16_t Adafruit_MAX31865::readRTD_Resistance(void) {
+uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
 
   uint32_t Rt;
 
@@ -284,7 +286,7 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(void) {
 
   Rt = rtd;
   Rt *= refResistor;
-  Rt >> 16;
+  Rt >>= 16;
 
   return Rt;
 }

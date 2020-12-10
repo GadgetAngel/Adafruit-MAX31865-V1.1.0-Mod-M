@@ -48,9 +48,9 @@
 
 
 #if (ARDUINO >= 100 || ARDUINOLPC)
-#include "Arduino.h"
+  #include "Arduino.h"
 #else
-#include "WProgram.h"
+  #include "WProgram.h"
 #endif
 
 typedef enum max31865_numwires {
