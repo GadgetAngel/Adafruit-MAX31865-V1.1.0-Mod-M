@@ -79,6 +79,7 @@ public:
 
   float temperature(float RTDnominal, float refResistor);
   uint16_t readRTD_Resistance(uint32_t refResistor);
+  uint16_t readRTD_with_Fault();
 
 private:
   int8_t _sclk, _miso, _mosi, _cs;
