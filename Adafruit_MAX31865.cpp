@@ -294,11 +294,10 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
 /**************************************************************************/
 /*!
     @brief Read the raw 16-bit value from the RTD_REG in one shot mode 
-
     @return The raw unsigned 16-bit RTD value with ERROR bit attached, NOT temperature!
 */
 /**************************************************************************/
-uint16_t Adafruit_MAX31865::readRTD_with_Fault() {
+uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
 
   clearFault();
   enableBias(true);
