@@ -15,6 +15,13 @@
  ****************************************************/
 
 #include "Adafruit_MAX31865.h"
+
+#ifndef __AVR
+  #include "../../../../Marlin/src/HAL/shared/HAL_SPI.h"
+#endif
+
+#include "../../../../Marlin/src/HAL/shared/Delay.h"
+
 #ifdef __AVR
 #include <avr/pgmspace.h>
 #elif defined(ESP8266)
@@ -24,8 +31,15 @@
 #include <SPI.h>
 #include <stdlib.h>
 
+#ifdef __AVR
 static SPISettings max31865_spisettings =
     SPISettings(500000, MSBFIRST, SPI_MODE1);
+#else
+  static SPISettings max31865_spisettings =
+      SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE1);
+#endif
+
+
 
 /**************************************************************************/
 /*!
@@ -39,10 +53,10 @@ static SPISettings max31865_spisettings =
 //
 Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
                                      int8_t spi_miso, int8_t spi_clk) {
-  _sclk = spi_clk;
   _cs = spi_cs;
+  _mosi = spi_mosi;  
   _miso = spi_miso;
-  _mosi = spi_mosi;
+  _sclk = spi_clk; 
 }
 
 /**************************************************************************/
@@ -244,11 +258,11 @@ float Adafruit_MAX31865::temperature(float RTDnominal, float refResistor) {
 uint16_t Adafruit_MAX31865::readRTD(void) {
   clearFault();
   enableBias(true);
-  delay(10);
+  DELAY_US(10000);
   uint8_t t = readRegister8(MAX31856_CONFIG_REG);
   t |= MAX31856_CONFIG_1SHOT;
   writeRegister8(MAX31856_CONFIG_REG, t);
-  delay(65);
+  DELAY_US(65000);
 
   uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
 
@@ -273,11 +287,11 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
 
   clearFault();
   enableBias(true);
-  delay(10);
+  DELAY_US(10000);
   uint8_t t = readRegister8(MAX31856_CONFIG_REG);
   t |= MAX31856_CONFIG_1SHOT;
   writeRegister8(MAX31856_CONFIG_REG, t);
-  delay(65);
+  DELAY_US(65000);
 
   uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
 
@@ -301,11 +315,11 @@ uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
 
   clearFault();
   enableBias(true);
-  delay(10);
+  DELAY_US(10000);
   uint8_t t = readRegister8(MAX31856_CONFIG_REG);
   t |= MAX31856_CONFIG_1SHOT;
   writeRegister8(MAX31856_CONFIG_REG, t);
-  delay(65);
+  DELAY_US(65000);
 
   uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
 
