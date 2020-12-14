@@ -284,6 +284,7 @@ uint16_t Adafruit_MAX31865::readRTD(void) {
 uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
 
   uint32_t Rt;
+  uint16_t Rt_resistance = 0;
 
   clearFault();
   enableBias(true);
@@ -302,7 +303,9 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
   Rt *= refResistor;
   Rt >>= 16;
 
-  return rtd;
+  Rt_resistance = Rt;
+
+  return Rt_resistance;
 }
 
 /**************************************************************************/
