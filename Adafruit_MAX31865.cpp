@@ -54,9 +54,9 @@ static SPISettings max31865_spisettings =
 Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
                                      int8_t spi_miso, int8_t spi_clk) {
   _cs = spi_cs;
-  _mosi = spi_mosi;  
+  _mosi = spi_mosi;
   _miso = spi_miso;
-  _sclk = spi_clk; 
+  _sclk = spi_clk;
 }
 
 /**************************************************************************/
@@ -277,7 +277,7 @@ uint16_t Adafruit_MAX31865::readRTD(void) {
     @brief Read the raw 16-bit value from the RTD_REG in one shot mode and
     calucalte the RTD resistance value
     @param refResistor The value of the matching reference resistor, usually
-    430 or 4300    
+    430 or 4300
     @return The raw unsigned 16-bit RTD resistance value, NOT temperature!
 */
 /**************************************************************************/
@@ -299,7 +299,7 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
 
 /**************************************************************************/
 /*!
-    @brief Read the raw 16-bit value from the RTD_REG in one shot mode 
+    @brief Read the raw 16-bit value from the RTD_REG in one shot mode
     @return The raw unsigned 16-bit RTD value with ERROR bit attached, NOT temperature!
 */
 /**************************************************************************/
