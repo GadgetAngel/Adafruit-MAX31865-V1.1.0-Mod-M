@@ -284,28 +284,17 @@ uint16_t Adafruit_MAX31865::readRTD(void) {
 uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
 
   uint32_t Rt;
-  uint16_t Rt_resistance = 0;
 
-  clearFault();
-  enableBias(true);
-  DELAY_US(10000);
-  uint8_t t = readRegister8(MAX31856_CONFIG_REG);
-  t |= MAX31856_CONFIG_1SHOT;
-  writeRegister8(MAX31856_CONFIG_REG, t);
-  DELAY_US(65000);
-
-  uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
-
-  // remove fault
-  rtd >>= 1;
+  uint16_t rtd = readRTD();
 
   Rt = rtd;
   Rt *= refResistor;
   Rt >>= 16;
+  rtd = 0;
 
-  Rt_resistance = Rt;
+  rtd = Rt;
 
-  return Rt_resistance;
+  return rtd;
 }
 
 /**************************************************************************/
