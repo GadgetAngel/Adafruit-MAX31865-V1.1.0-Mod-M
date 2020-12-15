@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Request a Feature.    If this doesn’t look right, https://github.com/GadgetAngel/Adafruit-MAX31865-V1.1.0-Mod-M/issues/new/choose
+about: Request a Feature.
 title: "[FR] (feature request title)"
 labels: ''
 assignees: ''
