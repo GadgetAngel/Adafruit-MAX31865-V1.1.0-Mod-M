@@ -1,7 +1,6 @@
 ---
 name: Bug report
-about: Report a bug in Adafruit-MAX31865-V1.1.0-Mod-M library,    If this doesn’t
-  look right, https://github.com/GadgetAngel/Adafruit-MAX31865-V1.1.0-Mod-M/issues/new/choose
+about: Report a bug in Adafruit-MAX31865-V1.1.0-Mod-M library, If this doesn’t look right, https://github.com/GadgetAngel/Adafruit-MAX31865-V1.1.0-Mod-M/issues/new/choose
 title: "[BUG] (short description)"
 labels: ''
 assignees: ''
