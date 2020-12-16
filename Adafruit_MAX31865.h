@@ -62,9 +62,16 @@ typedef enum max31865_numwires {
 /*! Interface class for the MAX31865 RTD Sensor reader */
 class Adafruit_MAX31865 {
 public:
+  Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi, uint32_t spi_miso,
+                    uint32_t spi_clk, uint8_t pin_mapping);
+
+  Adafruit_MAX31865(uint32_t spi_cs, uint8_t pin_mapping);
+
   Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi, int8_t spi_miso,
                     int8_t spi_clk);
+
   Adafruit_MAX31865(int8_t spi_cs);
+
 
   bool begin(max31865_numwires_t x = MAX31865_2WIRE);
 
@@ -83,6 +90,8 @@ public:
 
 private:
   int8_t _sclk, _miso, _mosi, _cs;
+  uint32_t __sclk, __miso, __mosi, __cs;
+  uint8_t __pin_mapping = 0x00;
 
   void readRegisterN(uint8_t addr, uint8_t buffer[], uint8_t n);
 

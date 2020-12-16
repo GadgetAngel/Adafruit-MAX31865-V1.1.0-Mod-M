@@ -51,12 +51,14 @@ static SPISettings max31865_spisettings =
 */
 /**************************************************************************/
 //
-Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
-                                     int8_t spi_miso, int8_t spi_clk) {
-  _cs = spi_cs;
-  _mosi = spi_mosi;
-  _miso = spi_miso;
-  _sclk = spi_clk;
+Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi,
+                                     uint32_t spi_miso, uint32_t spi_clk,
+                                     uint8_t pin_mapping) {
+  __cs = spi_cs;
+  __mosi = spi_mosi;
+  __miso = spi_miso;
+  __sclk = spi_clk;
+  __pin_mapping = pin_mapping;
 }
 
 /**************************************************************************/
@@ -65,6 +67,21 @@ Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
     @param spi_cs the SPI CS pin to use along with the default SPI device
 */
 /**************************************************************************/
+//
+Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint8_t pin_mapping) {
+  __cs = spi_cs;
+  __sclk = __miso = __mosi = -1UL;
+  __pin_mapping = pin_mapping;
+}
+
+Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
+                                     int8_t spi_miso, int8_t spi_clk) {
+  _cs = spi_cs;
+  _mosi = spi_mosi;
+  _miso = spi_miso;
+  _sclk = spi_clk;
+}
+
 Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs) {
   _cs = spi_cs;
   _sclk = _miso = _mosi = -1;
@@ -79,23 +96,40 @@ Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs) {
 */
 /**************************************************************************/
 bool Adafruit_MAX31865::begin(max31865_numwires_t wires) {
-  pinMode(_cs, OUTPUT);
-  digitalWrite(_cs, HIGH);
 
-  if (_sclk != -1) {
-    // define pin modes
-    pinMode(_sclk, OUTPUT);
-    digitalWrite(_sclk, LOW);
-    pinMode(_mosi, OUTPUT);
-    pinMode(_miso, INPUT);
-  } else {
+  if (!__pin_mapping) {
+    pinMode(_cs, OUTPUT);
+    digitalWrite(_cs, HIGH);
+  }
+  else {
+    pinMode(__cs, OUTPUT);
+    digitalWrite(__cs, HIGH);
+  }
+
+  // define pin modes
+  if (_sclk != -1 || __sclk != -1UL) {
+    if (!__pin_mapping) {
+      pinMode(_sclk, OUTPUT);
+      digitalWrite(_sclk, LOW);
+      pinMode(_mosi, OUTPUT);
+      pinMode(_miso, INPUT);
+    }
+    else {
+      pinMode(__sclk, OUTPUT);
+      digitalWrite(__sclk, LOW);
+      pinMode(__mosi, OUTPUT);
+      pinMode(__miso, INPUT);
+    }
+  }
+  else {
     // start and configure hardware SPI
     SPI.begin();
   }
 
-  for (uint8_t i = 0; i < 16; i++) {
+  //
+  //for (uint8_t i = 0; i < 16; i++) {
     // readRegister8(i);
-  }
+  //}
 
   setWires(wires);
   enableBias(false);
@@ -342,12 +376,19 @@ void Adafruit_MAX31865::readRegisterN(uint8_t addr, uint8_t buffer[],
                                       uint8_t n) {
   addr &= 0x7F; // make sure top bit is not set
 
-  if (_sclk == -1)
+  if (_sclk == -1 || __sclk == -1UL)
     SPI.beginTransaction(max31865_spisettings);
   else
-    digitalWrite(_sclk, LOW);
+    if (!__pin_mapping)
+      digitalWrite(_sclk, LOW);
+    else
+      digitalWrite(__sclk, LOW);
 
-  digitalWrite(_cs, LOW);
+  if (!__pin_mapping)
+    digitalWrite(_cs, LOW);
+  else
+    digitalWrite(__cs, LOW);
+
 
   spixfer(addr);
 
@@ -359,19 +400,28 @@ void Adafruit_MAX31865::readRegisterN(uint8_t addr, uint8_t buffer[],
   }
   // Serial.println();
 
-  if (_sclk == -1)
+  if (_sclk == -1 || __sclk == -1UL)
     SPI.endTransaction();
 
-  digitalWrite(_cs, HIGH);
+  if (!__pin_mapping)
+    digitalWrite(_cs, HIGH);
+  else
+    digitalWrite(__cs, HIGH);
 }
 
 void Adafruit_MAX31865::writeRegister8(uint8_t addr, uint8_t data) {
-  if (_sclk == -1)
+  if (_sclk == -1 || __sclk == -1UL)
     SPI.beginTransaction(max31865_spisettings);
   else
-    digitalWrite(_sclk, LOW);
+    if (!__pin_mapping)
+      digitalWrite(_sclk, LOW);
+    else
+      digitalWrite(__sclk, LOW);
 
-  digitalWrite(_cs, LOW);
+  if (!__pin_mapping)
+    digitalWrite(_cs, LOW);
+  else
+    digitalWrite(__cs, LOW);
 
   spixfer(addr | 0x80); // make sure top bit is set
   spixfer(data);
@@ -379,14 +429,17 @@ void Adafruit_MAX31865::writeRegister8(uint8_t addr, uint8_t data) {
   // Serial.print("$"); Serial.print(addr, HEX); Serial.print(" = 0x");
   // Serial.println(data, HEX);
 
-  if (_sclk == -1)
+  if (_sclk == -1 || __sclk == -1UL)
     SPI.endTransaction();
 
-  digitalWrite(_cs, HIGH);
+  if (!__pin_mapping)
+    digitalWrite(_cs, HIGH);
+  else
+    digitalWrite(__cs, HIGH);
 }
 
 uint8_t Adafruit_MAX31865::spixfer(uint8_t x) {
-  if (_sclk == -1)
+  if (_sclk == -1 || __sclk == -1UL)
     return SPI.transfer(x);
 
   // software spi
@@ -395,11 +448,20 @@ uint8_t Adafruit_MAX31865::spixfer(uint8_t x) {
 
   for (int i = 7; i >= 0; i--) {
     reply <<= 1;
-    digitalWrite(_sclk, HIGH);
-    digitalWrite(_mosi, x & (1 << i));
-    digitalWrite(_sclk, LOW);
-    if (digitalRead(_miso))
-      reply |= 1;
+    if (!__pin_mapping) {
+      digitalWrite(_sclk, HIGH);
+      digitalWrite(_mosi, x & (1 << i));
+      digitalWrite(_sclk, LOW);
+      if (digitalRead(_miso))
+        reply |= 1;
+    }
+    else {
+      digitalWrite(__sclk, HIGH);
+      digitalWrite(__mosi, x & (1 << i));
+      digitalWrite(__sclk, LOW);
+      if (digitalRead(__miso))
+        reply |= 1;
+    }
   }
 
   return reply;
