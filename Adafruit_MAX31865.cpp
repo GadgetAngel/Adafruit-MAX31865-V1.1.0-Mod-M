@@ -48,7 +48,7 @@ static SPISettings max31865_spisettings =
     @param spi_mosi the SPI MOSI pin to use
     @param spi_miso the SPI MISO pin to use
     @param spi_clk the SPI clock pin to use
-    @param pin_mappping set to 1 for positive pin values
+    @param pin_mapping set to 1 for positive pin values
 */
 /**************************************************************************/
 Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi,
@@ -85,9 +85,9 @@ Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint8_t pin_mapping) {
 
   if (__pin_mapping == 0) {
     _cs = __cs;
-    _mosi = __mosi;
-    _miso = __miso;
-    _sclk = __sclk;
+    _mosi = -1;
+    _miso = -1;
+    _sclk = -1;
   }
 }
 
