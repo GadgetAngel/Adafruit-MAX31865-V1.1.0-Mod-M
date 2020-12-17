@@ -60,7 +60,7 @@ Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi,
   __sclk = spi_clk;
   __pin_mapping = pin_mapping;
 
-  if (__pin_mapping) == 0 {
+  if (__pin_mapping == 0)  {
     _cs = __cs;
     _mosi = __mosi;
     _miso = __miso;
@@ -83,7 +83,7 @@ Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint8_t pin_mapping) {
   __sclk = __miso = __mosi = -1UL;  //-1UL or 0xFFFFFFFF
   __pin_mapping = pin_mapping;
 
-  if (__pin_mapping) == 0 {
+  if (__pin_mapping == 0) {
     _cs = __cs;
     _mosi = __mosi;
     _miso = __miso;
