@@ -42,11 +42,13 @@ static SPISettings max31865_spisettings =
 /**************************************************************************/
 /*!
     @brief Create the interface object using software (bitbang) SPI for
-    PIN values which are larger than 127.
+    PIN values which are larger than 127. If you have PIN values less than
+    or equal to 127 use the other call for SW SPI.
     @param spi_cs the SPI CS pin to use
     @param spi_mosi the SPI MOSI pin to use
     @param spi_miso the SPI MISO pin to use
     @param spi_clk the SPI clock pin to use
+    @param pin_mappping set to 1 for positive pin values
 */
 /**************************************************************************/
 Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi,
@@ -57,31 +59,48 @@ Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi,
   __miso = spi_miso;
   __sclk = spi_clk;
   __pin_mapping = pin_mapping;
+
+  if (__pin_mapping) == 0 {
+    _cs = __cs;
+    _mosi = __mosi;
+    _miso = __miso;
+    _sclk = __sclk;
+  }
+
 }
 
 /**************************************************************************/
 /*!
-    @brief Create the interface object using hardware SPI for PIN value
-    which are larger than 127.
+    @brief Create the interface object using hardware SPI for PIN values
+    which are larger than 127. If you have PIN values less than
+    or equal to 127 use the other call for HW SPI
     @param spi_cs the SPI CS pin to use along with the default SPI device
+    @param pin_mapping set to 1 for positive pin values
 */
 /**************************************************************************/
 Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint8_t pin_mapping) {
   __cs = spi_cs;
   __sclk = __miso = __mosi = -1UL;  //-1UL or 0xFFFFFFFF
   __pin_mapping = pin_mapping;
+
+  if (__pin_mapping) == 0 {
+    _cs = __cs;
+    _mosi = __mosi;
+    _miso = __miso;
+    _sclk = __sclk;
+  }
 }
 
 /**************************************************************************/
 /*!
-    @brief Create the interface object using software (bitbang) SPI
+    @brief Create the interface object using software (bitbang) SPI for PIN
+    values less than or equal to 127.
     @param spi_cs the SPI CS pin to use
     @param spi_mosi the SPI MOSI pin to use
     @param spi_miso the SPI MISO pin to use
     @param spi_clk the SPI clock pin to use
 */
 /**************************************************************************/
-//
 Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
                                      int8_t spi_miso, int8_t spi_clk) {
   _cs = spi_cs;
@@ -92,7 +111,8 @@ Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
 
 /**************************************************************************/
 /*!
-    @brief Create the interface object using hardware SPI for PIN
+    @brief Create the interface object using hardware SPI for PIN for PIN
+    values less than or equal to 127.
     @param spi_cs the SPI CS pin to use along with the default SPI device
 */
 /**************************************************************************/
