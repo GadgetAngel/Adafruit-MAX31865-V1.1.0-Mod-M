@@ -39,18 +39,16 @@ static SPISettings max31865_spisettings =
       SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE1);
 #endif
 
-
-
 /**************************************************************************/
 /*!
-    @brief Create the interface object using software (bitbang) SPI
+    @brief Create the interface object using software (bitbang) SPI for
+    PIN values which are larger than 127.
     @param spi_cs the SPI CS pin to use
     @param spi_mosi the SPI MOSI pin to use
     @param spi_miso the SPI MISO pin to use
     @param spi_clk the SPI clock pin to use
 */
 /**************************************************************************/
-//
 Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi,
                                      uint32_t spi_miso, uint32_t spi_clk,
                                      uint8_t pin_mapping) {
@@ -63,17 +61,27 @@ Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi,
 
 /**************************************************************************/
 /*!
-    @brief Create the interface object using hardware SPI
+    @brief Create the interface object using hardware SPI for PIN value
+    which are larger than 127.
     @param spi_cs the SPI CS pin to use along with the default SPI device
 */
 /**************************************************************************/
-//
 Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint8_t pin_mapping) {
   __cs = spi_cs;
-  __sclk = __miso = __mosi = -1UL;
+  __sclk = __miso = __mosi = -1UL;  //-1UL or 0xFFFFFFFF
   __pin_mapping = pin_mapping;
 }
 
+/**************************************************************************/
+/*!
+    @brief Create the interface object using software (bitbang) SPI
+    @param spi_cs the SPI CS pin to use
+    @param spi_mosi the SPI MOSI pin to use
+    @param spi_miso the SPI MISO pin to use
+    @param spi_clk the SPI clock pin to use
+*/
+/**************************************************************************/
+//
 Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
                                      int8_t spi_miso, int8_t spi_clk) {
   _cs = spi_cs;
@@ -82,6 +90,12 @@ Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
   _sclk = spi_clk;
 }
 
+/**************************************************************************/
+/*!
+    @brief Create the interface object using hardware SPI for PIN
+    @param spi_cs the SPI CS pin to use along with the default SPI device
+*/
+/**************************************************************************/
 Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs) {
   _cs = spi_cs;
   _sclk = _miso = _mosi = -1;
