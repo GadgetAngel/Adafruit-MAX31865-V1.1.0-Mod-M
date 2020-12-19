@@ -464,7 +464,8 @@ uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
     SERIAL_ECHOPAIR(" ", rtd_MSB);
     SERIAL_ECHO("RTD LSB : ");
     SERIAL_PRINTF("   %X  ", rtd_LSB);
-    SERIAL_ECHOPAIR(" ", rtd_LSB);
+    SERIAL_ECHOLNPAIR(" ", rtd_LSB);
+    SERIAL_ECHOLN();
   #endif
 
   return rtd;
