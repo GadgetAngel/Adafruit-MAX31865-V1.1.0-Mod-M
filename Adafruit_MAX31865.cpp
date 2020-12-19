@@ -36,7 +36,6 @@
 
 #include "Adafruit_MAX31865.h"
 
-
 #include "../../../../Marlin/src/HAL/shared/Delay.h"
 
 #ifdef __AVR__
