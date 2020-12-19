@@ -445,7 +445,7 @@ uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
 
   #if HAS_STM32_DEBUG || HAS_LPC1768_DEBUG
     uint16_t rtd_MSB = rtd >> 8;
-    uint16_t rtd_LSB = rtd & 0x00FF
+    uint16_t rtd_LSB = rtd & 0x00FF;
   #endif
   #if HAS_STM32_DEBUG
     Serial.print("RTD MSB : 0x");
