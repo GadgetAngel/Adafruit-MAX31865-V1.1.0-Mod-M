@@ -218,14 +218,14 @@ bool Adafruit_MAX31865::begin(max31865_numwires_t wires) {
     if (!__pin_mapping) {
       SERIAL_ECHOLN();
       SERIAL_ECHOLNPAIR("Regular call for _cs: ", _cs ," _miso: ", _miso ," _sclk: ", _sclk," _mosi: ",_mosi);
-      SERIAL_PRINTF("Regular call for _cs: %X  _miso: %X  _sclk: %X  _mosi: %X  ", _cs, _miso, _sclk, _mosi);
+      SERIAL_PRINTF("Regular call for _cs: 0x%X  _miso: 0x%X  _sclk: 0x%X  _mosi: 0x%X  ", _cs, _miso, _sclk, _mosi);
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
     }
     else {
       SERIAL_ECHOLN();
       SERIAL_ECHOLNPAIR("PIN_MAPPING call for __cs: ", __cs ," __miso: ", __miso ," __sclk: ", __sclk," __mosi: ",__mosi);
-      SERIAL_PRINTF("PIN_MAPPING call for __cs: %X  __miso: %X  __sclk: %X  __mosi: %X  ", __cs, __miso, __sclk, __mosi);
+      SERIAL_PRINTF("PIN_MAPPING call for __cs: 0x%X  __miso: 0x%X  __sclk: 0x%X  __mosi: 0x%X  ", __cs, __miso, __sclk, __mosi);
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
     }
@@ -447,24 +447,25 @@ uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
     uint16_t rtd_LSB = rtd & 0x00FF;
   #endif
   #if HAS_STM32_DEBUG
+    Serial.println(" ");
     Serial.print("RTD MSB : 0x");
     Serial.print(rtd_MSB, HEX);
-    Serial.print("   ");
+    Serial.print("  : ");
     Serial.print(rtd_MSB);
-    Serial.print("RTD LSB : 0x");
+    Serial.print("  RTD LSB : 0x");
     Serial.print(rtd_LSB, HEX);
-    Serial.print("   ");
-    Serial.print(rtd_LSB);
+    Serial.print("  : ");
+    Serial.println(rtd_LSB);
+    Serial.println(" ");
   #endif
-
   #if HAS_LPC1768_DEBUG
     SERIAL_ECHOLN();
     SERIAL_ECHO("RTD MSB : ");
-    SERIAL_PRINTF("   %X  ", rtd_MSB);
-    SERIAL_ECHOPAIR(" ", rtd_MSB);
-    SERIAL_ECHO("RTD LSB : ");
-    SERIAL_PRINTF("   %X  ", rtd_LSB);
-    SERIAL_ECHOLNPAIR(" ", rtd_LSB);
+    SERIAL_PRINTF("   0x%X  ", rtd_MSB);
+    SERIAL_ECHOPAIR(" : ", rtd_MSB);
+    SERIAL_ECHO("   RTD LSB : ");
+    SERIAL_PRINTF("   0x%X  ", rtd_LSB);
+    SERIAL_ECHOLNPAIR(" : ", rtd_LSB,"   ");
     SERIAL_ECHOLN();
   #endif
 
