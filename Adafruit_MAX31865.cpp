@@ -14,24 +14,41 @@
   BSD license, all text above must be included in any redistribution
  ****************************************************/
 
+//#define DEBUG_STM32
+//#define DEBUG_LPC_SPI
+//#define DEBUG_LPC
+
+#if defined(STM32F407IX) && defined(DEBUG_STM32)
+  #define HAS_STM32_DEBUG 1
+#endif
+
+#if defined(TARGET_LPC1768) && defined(DEBUG_LPC)
+  #define HAS_LPC1768_DEBUG 1
+#endif
+
+#if defined(TARGET_LPC1768) && defined(DEBUG_LPC_SPI)
+  #define HAS_LPC1768_DEBUG_SPI 1
+#endif
+
+#if HAS_LPC1768_DEBUG || HAS_LPC1768_DEBUG_SPI
+  #include "../../../../Marlin/src/inc/MarlinConfig.h"
+#endif
+
 #include "Adafruit_MAX31865.h"
 
-#ifndef __AVR
-  #include "../../../../Marlin/src/HAL/shared/HAL_SPI.h"
-#endif
 
 #include "../../../../Marlin/src/HAL/shared/Delay.h"
 
-#ifdef __AVR
+#ifdef __AVR__
 #include <avr/pgmspace.h>
 #elif defined(ESP8266)
 #include <pgmspace.h>
 #endif
 
-#include <SPI.h>
 #include <stdlib.h>
+#include <SPI.h>
 
-#ifdef __AVR
+#ifdef __AVR__
 static SPISettings max31865_spisettings =
     SPISettings(500000, MSBFIRST, SPI_MODE1);
 #else
@@ -160,18 +177,61 @@ bool Adafruit_MAX31865::begin(max31865_numwires_t wires) {
     SPI.begin();
   }
 
-  //
-  //for (uint8_t i = 0; i < 16; i++) {
-    // readRegister8(i);
-  //}
-
   setWires(wires);
   enableBias(false);
   autoConvert(false);
   clearFault();
 
-  // Serial.print("config: ");
-  // Serial.println(readRegister8(MAX31856_CONFIG_REG), HEX);
+  #if HAS_STM32_DEBUG
+    //Serial.print("config: ");
+    //Serial.println(readRegister8(MAX31856_CONFIG_REG), HEX);
+  #endif
+
+  #if HAS_STM32_DEBUG
+    if (!__pin_mapping) {
+      Serial.print("\n\n_cs: ");
+      Serial.print(_cs);
+      Serial.print(" _miso: ");
+      Serial.print(_miso);
+      Serial.print(" _sclk: ");
+      Serial.print(_sclk);
+      Serial.print(" _mosi: ");
+      Serial.print(_mosi);
+      Serial.print("\n\n");
+    }
+    else {
+      Serial.print("\n\n__cs: ");
+      Serial.print(__cs);
+      Serial.print(" __miso: ");
+      Serial.print(__miso);
+      Serial.print(" __sclk: ");
+      Serial.print(__sclk);
+      Serial.print(" __mosi: ");
+      Serial.print(__mosi);
+      Serial.print(" __pin_mapping: ");
+      Serial.print(__pin_mapping);
+      Serial.print("\n\n");
+    }
+  #endif
+
+  #if HAS_LPC1768_DEBUG_SPI
+    // for testing
+    if (!__pin_mapping) {
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLNPAIR("Regular call for _cs: ", _cs ," _miso: ", _miso ," _sclk: ", _sclk," _mosi: ",_mosi);
+      SERIAL_PRINTF("Regular call for _cs: %X  _miso: %X  _sclk: %X  ", _cs, _miso, _sclk);
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLN();
+    }
+    else {
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLNPAIR("PIN_MAPPING call for __cs: ", __cs ," __miso: ", __miso ," __sclk: ", __sclk," __mosi: ",__mosi);
+      SERIAL_PRINTF("PIN_MAPPING call for __cs: %X  __miso: %X  __sclk: %X  ", __cs, __miso, __sclk);
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLN();
+    }
+  #endif
+
   return true;
 }
 
@@ -382,6 +442,32 @@ uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
   DELAY_US(65000);
 
   uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
+
+  #if HAS_STM32_DEBUG || HAS_LPC1768_DEBUG
+    uint16_t rtd_MSB = rtd >> 8;
+    uint16_t rtd_LSB = rtd & 0x00FF
+  #endif
+
+  #if HAS_STM32_DEBUG
+    Serial.print("RTD MSB : 0x");
+    Serial.print(rtd_MSB, HEX);
+    Serial.print("   ");
+    Serial.print(rtd_MSB);
+    Serial.print("RTD LSB : 0x");
+    Serial.print(rtd_LSB, HEX);
+    Serial.print("   ");
+    Serial.print(rtd_LSB);
+  #endif
+
+  #if HAS_LPC1768_DEBUG
+    SERIAL_ECHOLN();
+    SERIAL_ECHO("RTD MSB : ");
+    SERIAL_PRINTF("   %X  ", rtd_MSB);
+    SERIAL_ECHOPAIR(" ", rtd_MSB);
+    SERIAL_ECHO("RTD LSB : ");
+    SERIAL_PRINTF("   %X  ", rtd_LSB);
+    SERIAL_ECHOPAIR(" ", rtd_LSB);
+  #endif
 
   return rtd;
 }
