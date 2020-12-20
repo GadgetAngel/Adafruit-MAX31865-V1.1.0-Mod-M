@@ -92,6 +92,7 @@ private:
   int8_t _sclk, _miso, _mosi, _cs;
   uint32_t __sclk, __miso, __mosi, __cs;
   uint8_t __pin_mapping = 0x00;
+  bool first_reading = true;
 
   void readRegisterN(uint8_t addr, uint8_t buffer[], uint8_t n);
 
