@@ -392,6 +392,7 @@ void Adafruit_MAX31865::setWires(max31865_numwires_t wires) {
 float Adafruit_MAX31865::temperature(float RTDnominal, float refResistor) {
   float Z1, Z2, Z3, Z4, Rt, temp;
 
+  // prime the SPI communication channel
   if (!first_reading)
     Rt = readRTD();
   else {
@@ -493,6 +494,7 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
   uint32_t Rt;
   uint16_t rtd;
 
+  // prime the SPI communication channel
   if (!first_reading)
     rtd = readRTD();
   else {
@@ -550,6 +552,7 @@ uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
   writeRegister8(MAX31856_CONFIG_REG, t);
   DELAY_US(65000);
 
+  // prime the SPI communication channel
   if (!first_reading)
     rtd = readRegister16(MAX31856_RTDMSB_REG);
   else {
