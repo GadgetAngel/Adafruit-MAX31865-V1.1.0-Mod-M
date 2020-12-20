@@ -500,25 +500,25 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
     rtd = readRTD();
     #if HAS_STM32_DEBUG
       Serial.print("\n\n1st Reading: 0x");
-      Serial.println(d, HEX);
+      Serial.println(rtd, HEX);
     #endif
     #if HAS_LPC1768_DEBUG
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
       SERIAL_ECHO("1st Reading:");
-      SERIAL_PRINTF("   0x%X  ", d);
+      SERIAL_PRINTF("   0x%X  ", rtd);
       SERIAL_ECHOLN();
     #endif
     rtd = readRTD();
     #if HAS_STM32_DEBUG
       Serial.print("\n\n2nd Reading: 0x");
-      Serial.println(d, HEX);
+      Serial.println(rtd, HEX);
     #endif
     #if HAS_LPC1768_DEBUG
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
       SERIAL_ECHO("2nd Reading:");
-      SERIAL_PRINTF("   0x%X  ", d);
+      SERIAL_PRINTF("   0x%X  ", rtd);
       SERIAL_ECHOLN();
     #endif
   }
@@ -557,25 +557,25 @@ uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
     rtd = readRegister16(MAX31856_RTDMSB_REG);
     #if HAS_STM32_DEBUG
       Serial.print("\n\n1st Reading: 0x");
-      Serial.println(d, HEX);
+      Serial.println(rtd, HEX);
     #endif
     #if HAS_LPC1768_DEBUG
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
       SERIAL_ECHO("1st Reading:");
-      SERIAL_PRINTF("   0x%X  ", d);
+      SERIAL_PRINTF("   0x%X  ", rtd);
       SERIAL_ECHOLN();
     #endif
     rtd = readRegister16(MAX31856_RTDMSB_REG);
     #if HAS_STM32_DEBUG
       Serial.print("\n\n2nd Reading: 0x");
-      Serial.println(d, HEX);
+      Serial.println(rtd, HEX);
     #endif
     #if HAS_LPC1768_DEBUG
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
       SERIAL_ECHO("2nd Reading:");
-      SERIAL_PRINTF("   0x%X  ", d);
+      SERIAL_PRINTF("   0x%X  ", rtd);
       SERIAL_ECHOLN();
     #endif
   }
