@@ -392,25 +392,25 @@ float Adafruit_MAX31865::temperature(float RTDnominal, float refResistor) {
     Rt = readRTD();
     #if HAS_STM32_DEBUG
       Serial.print("\n\n1st Reading: 0x");
-      Serial.println(d, HEX);
+      Serial.println(Rt, HEX);
     #endif
     #if HAS_LPC1768_DEBUG
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
       SERIAL_ECHO("1st Reading:");
-      SERIAL_PRINTF("   0x%X  ", d);
+      SERIAL_PRINTF("   0x%X  ", Rt);
       SERIAL_ECHOLN();
     #endif
     Rt = readRTD();
     #if HAS_STM32_DEBUG
       Serial.print("\n\n2nd Reading: 0x");
-      Serial.println(d, HEX);
+      Serial.println(Rt, HEX);
     #endif
     #if HAS_LPC1768_DEBUG
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
       SERIAL_ECHO("2nd Reading:");
-      SERIAL_PRINTF("   0x%X  ", d);
+      SERIAL_PRINTF("   0x%X  ", Rt);
       SERIAL_ECHOLN();
     #endif
   }
