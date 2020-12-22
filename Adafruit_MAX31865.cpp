@@ -41,7 +41,9 @@
 
 #include "Adafruit_MAX31865.h"
 
-#include "../../../../Marlin/src/HAL/shared/Delay.h"
+#if !defined(__AVR__)
+  #include "../../../../Marlin/src/HAL/shared/Delay.h"
+#endif
 
 #ifdef __AVR__
 #include <avr/pgmspace.h>
@@ -459,11 +461,19 @@ float Adafruit_MAX31865::temperature(float RTDnominal, float refResistor) {
 uint16_t Adafruit_MAX31865::readRTD(void) {
   clearFault();
   enableBias(true);
-  DELAY_US(10000);
+  #if !defined(__AVR__)
+    DELAY_US(10000)
+  #else
+    delay(10);
+  #endif
   uint8_t t = readRegister8(MAX31856_CONFIG_REG);
   t |= MAX31856_CONFIG_1SHOT;
   writeRegister8(MAX31856_CONFIG_REG, t);
-  DELAY_US(65000);
+  #if !defined(__AVR__)
+    DELAY_US(65000);
+  #else
+    delay(65);
+  #endif
 
   uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
 
@@ -538,11 +548,19 @@ uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
 
   clearFault();
   enableBias(true);
-  DELAY_US(10000);
+  #if !defined(__AVR__)
+    DELAY_US(10000);
+  #else
+    delay(10);
+  #endif
   uint8_t t = readRegister8(MAX31856_CONFIG_REG);
   t |= MAX31856_CONFIG_1SHOT;
   writeRegister8(MAX31856_CONFIG_REG, t);
-  DELAY_US(65000);
+  #if !defined(__AVR__)
+    DELAY_US(65000);
+  #else
+    delay(65);
+  #endif
 
   // prime the SPI communication channel
   if (!first_reading)
