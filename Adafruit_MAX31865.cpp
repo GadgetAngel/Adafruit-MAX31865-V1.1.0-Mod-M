@@ -46,9 +46,10 @@
 #endif
 
 #ifdef __AVR__
-#include <avr/pgmspace.h>
+  #define AVR_FLAG 1
+  #include <avr/pgmspace.h>
 #elif defined(ESP8266)
-#include <pgmspace.h>
+  #include <pgmspace.h>
 #endif
 
 #include <stdlib.h>
@@ -77,9 +78,7 @@
     SPISettings(SPI_CLOCK_DIV4, MSBFIRST, MAX31865_SPI_MODE);
 #else
   static SPISettings max31865_spisettings =
-      SPISettings(500000, MSBFIRST, SPI_MODE1);
-  //static SPISettings max31865_spisettings =
-    //SPISettings(500000, MSBFIRST, MAX31865_SPI_MODE);
+    SPISettings(500000, MSBFIRST, MAX31865_SPI_MODE);
 #endif
 
 /**************************************************************************/
@@ -123,7 +122,7 @@ Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint32_t spi_mosi,
 /**************************************************************************/
 Adafruit_MAX31865::Adafruit_MAX31865(uint32_t spi_cs, uint8_t pin_mapping) {
   __cs = spi_cs;
-  __sclk = __miso = __mosi = -1UL;  //-1UL or 0xFFFFFFFF
+  __sclk = __miso = __mosi = -1UL;  //-1UL or 0xFFFFFFFF or 4294967295
   __pin_mapping = pin_mapping;
 
   if (__pin_mapping == 0) {
@@ -150,6 +149,14 @@ Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
   _mosi = spi_mosi;
   _miso = spi_miso;
   _sclk = spi_clk;
+
+  //initalize __pin_mapping variables
+  __cs = 0;
+  __mosi = 0;
+  __miso = 0;
+  __sclk = 0;
+  __pin_mapping = 0;
+
 }
 
 /**************************************************************************/
@@ -162,6 +169,14 @@ Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs, int8_t spi_mosi,
 Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs) {
   _cs = spi_cs;
   _sclk = _miso = _mosi = -1;
+
+  //initialzie __pin_mapping variables
+  __cs = 0;
+  __mosi = 0;
+  __miso = 0;
+  __sclk = 0;
+  __pin_mapping = 0;
+
 }
 
 /**************************************************************************/
