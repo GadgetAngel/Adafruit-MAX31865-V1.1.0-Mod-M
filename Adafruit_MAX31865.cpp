@@ -189,6 +189,37 @@ Adafruit_MAX31865::Adafruit_MAX31865(int8_t spi_cs) {
 /**************************************************************************/
 bool Adafruit_MAX31865::begin(max31865_numwires_t wires) {
 
+#if AVR_FLAG
+
+  pinMode(_cs, OUTPUT);
+  digitalWrite(_cs, HIGH);
+
+  if (_sclk != -1) {
+    // define pin modes
+    pinMode(_sclk, OUTPUT);
+    digitalWrite(_sclk, LOW);
+    pinMode(_mosi, OUTPUT);
+    pinMode(_miso, INPUT);
+  } else {
+    // start and configure hardware SPI
+    SPI.begin();
+  }
+
+  for (uint8_t i = 0; i < 16; i++) {
+    // readRegister8(i);
+  }
+
+  setWires(wires);
+  enableBias(false);
+  autoConvert(false);
+  clearFault();
+
+  // Serial.print("config: ");
+  // Serial.println(readRegister8(MAX31856_CONFIG_REG), HEX);
+  return true;
+
+#else  // AVR_FLAG
+
   if (!__pin_mapping) {
     pinMode(_cs, OUTPUT);
     digitalWrite(_cs, HIGH);
@@ -300,6 +331,9 @@ bool Adafruit_MAX31865::begin(max31865_numwires_t wires) {
   #endif
 
   return true;
+
+#endif //end AVR_FLAG
+
 }
 
 /**************************************************************************/
@@ -407,36 +441,8 @@ void Adafruit_MAX31865::setWires(max31865_numwires_t wires) {
 float Adafruit_MAX31865::temperature(float RTDnominal, float refResistor) {
   float Z1, Z2, Z3, Z4, Rt, temp;
 
-  // prime the SPI communication channel
-  if (!first_reading)
-    Rt = readRTD();
-  else {
-    first_reading = false;
-    Rt = readRTD();
-    #if HAS_STM32_DEBUG
-      Serial.print("\n\n1st Reading: 0x");
-      Serial.println(Rt, HEX);
-    #endif
-    #if HAS_LPC1768_DEBUG
-      SERIAL_ECHOLN();
-      SERIAL_ECHOLN();
-      SERIAL_ECHO("1st Reading:");
-      SERIAL_PRINTF("   0x%X  ", Rt);
-      SERIAL_ECHOLN();
-    #endif
-    Rt = readRTD();
-    #if HAS_STM32_DEBUG
-      Serial.print("\n\n2nd Reading: 0x");
-      Serial.println(Rt, HEX);
-    #endif
-    #if HAS_LPC1768_DEBUG
-      SERIAL_ECHOLN();
-      SERIAL_ECHOLN();
-      SERIAL_ECHO("2nd Reading:");
-      SERIAL_PRINTF("   0x%X  ", Rt);
-      SERIAL_ECHOLN();
-    #endif
-  }
+  Rt = readRTD();
+
   Rt /= 32768;
   Rt *= refResistor;
 
@@ -480,28 +486,41 @@ float Adafruit_MAX31865::temperature(float RTDnominal, float refResistor) {
 */
 /**************************************************************************/
 uint16_t Adafruit_MAX31865::readRTD(void) {
-  clearFault();
-  enableBias(true);
-  #if !defined(__AVR__)
-    DELAY_US(10000)
-  #else
+  #if AVR_FLAG
+
+    clearFault();
+    enableBias(true);
     delay(10);
-  #endif
-  uint8_t t = readRegister8(MAX31856_CONFIG_REG);
-  t |= MAX31856_CONFIG_1SHOT;
-  writeRegister8(MAX31856_CONFIG_REG, t);
-  #if !defined(__AVR__)
-    DELAY_US(65000);
-  #else
+    uint8_t t = readRegister8(MAX31856_CONFIG_REG);
+    t |= MAX31856_CONFIG_1SHOT;
+    writeRegister8(MAX31856_CONFIG_REG, t);
     delay(65);
-  #endif
 
-  uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
+    uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
 
-  // remove fault
-  rtd >>= 1;
+    // remove fault
+    rtd >>= 1;
 
-  return rtd;
+    return rtd;
+
+  #else //AVR_FLAG
+
+    clearFault();
+    enableBias(true);
+    DELAY_US(10000)
+    uint8_t t = readRegister8(MAX31856_CONFIG_REG);
+    t |= MAX31856_CONFIG_1SHOT;
+    writeRegister8(MAX31856_CONFIG_REG, t);
+    DELAY_US(65000);
+
+    uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
+
+    // remove fault
+    rtd >>= 1;
+
+    return rtd;
+
+  #endif //end AVR_FLAG
 }
 
 /**************************************************************************/
@@ -517,36 +536,7 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
   uint32_t Rt;
   uint16_t rtd;
 
-  // prime the SPI communication channel
-  if (!first_reading)
-    rtd = readRTD();
-  else {
-    first_reading = false;
-    rtd = readRTD();
-    #if HAS_STM32_DEBUG
-      Serial.print("\n\n1st Reading: 0x");
-      Serial.println(rtd, HEX);
-    #endif
-    #if HAS_LPC1768_DEBUG
-      SERIAL_ECHOLN();
-      SERIAL_ECHOLN();
-      SERIAL_ECHO("1st Reading:");
-      SERIAL_PRINTF("   0x%X  ", rtd);
-      SERIAL_ECHOLN();
-    #endif
-    rtd = readRTD();
-    #if HAS_STM32_DEBUG
-      Serial.print("\n\n2nd Reading: 0x");
-      Serial.println(rtd, HEX);
-    #endif
-    #if HAS_LPC1768_DEBUG
-      SERIAL_ECHOLN();
-      SERIAL_ECHOLN();
-      SERIAL_ECHO("2nd Reading:");
-      SERIAL_PRINTF("   0x%X  ", rtd);
-      SERIAL_ECHOLN();
-    #endif
-  }
+  rtd = readRTD();
 
   Rt = rtd;
   Rt *= refResistor;
@@ -565,83 +555,63 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
 */
 /**************************************************************************/
 uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
-  uint16_t rtd = 0;
+  #if AVR_FLAG
 
-  clearFault();
-  enableBias(true);
-  #if !defined(__AVR__)
-    DELAY_US(10000);
-  #else
+    clearFault();
+    enableBias(true);
     delay(10);
-  #endif
-  uint8_t t = readRegister8(MAX31856_CONFIG_REG);
-  t |= MAX31856_CONFIG_1SHOT;
-  writeRegister8(MAX31856_CONFIG_REG, t);
-  #if !defined(__AVR__)
-    DELAY_US(65000);
-  #else
+    uint8_t t = readRegister8(MAX31856_CONFIG_REG);
+    t |= MAX31856_CONFIG_1SHOT;
+    writeRegister8(MAX31856_CONFIG_REG, t);
     delay(65);
-  #endif
 
-  // prime the SPI communication channel
-  if (!first_reading)
+    uint16_t rtd = readRegister16(MAX31856_RTDMSB_REG);
+
+    return rtd;
+
+  #else //AVR_FLAG
+
+    uint16_t rtd = 0;
+    clearFault();
+    enableBias(true);
+    DELAY_US(10000);
+    uint8_t t = readRegister8(MAX31856_CONFIG_REG);
+    t |= MAX31856_CONFIG_1SHOT;
+    writeRegister8(MAX31856_CONFIG_REG, t);
+    DELAY_US(65000);
+
     rtd = readRegister16(MAX31856_RTDMSB_REG);
-  else {
-    first_reading = false;
-    rtd = readRegister16(MAX31856_RTDMSB_REG);
+
+    #if HAS_STM32_DEBUG || HAS_LPC1768_DEBUG
+      uint16_t rtd_MSB = rtd >> 8;
+      uint16_t rtd_LSB = rtd & 0x00FF;
+    #endif
     #if HAS_STM32_DEBUG
-      Serial.print("\n\n1st Reading: 0x");
-      Serial.println(rtd, HEX);
+      Serial.println(" ");
+      Serial.print("RTD MSB : 0x");
+      Serial.print(rtd_MSB, HEX);
+      Serial.print("  : ");
+      Serial.print(rtd_MSB);
+      Serial.print("  RTD LSB : 0x");
+      Serial.print(rtd_LSB, HEX);
+      Serial.print("  : ");
+      Serial.println(rtd_LSB);
+      Serial.println(" ");
     #endif
     #if HAS_LPC1768_DEBUG
       SERIAL_ECHOLN();
-      SERIAL_ECHOLN();
-      SERIAL_ECHO("1st Reading:");
-      SERIAL_PRINTF("   0x%X  ", rtd);
-      SERIAL_ECHOLN();
-    #endif
-    rtd = readRegister16(MAX31856_RTDMSB_REG);
-    #if HAS_STM32_DEBUG
-      Serial.print("\n\n2nd Reading: 0x");
-      Serial.println(rtd, HEX);
-    #endif
-    #if HAS_LPC1768_DEBUG
-      SERIAL_ECHOLN();
-      SERIAL_ECHOLN();
-      SERIAL_ECHO("2nd Reading:");
-      SERIAL_PRINTF("   0x%X  ", rtd);
+      SERIAL_ECHO("RTD MSB : ");
+      SERIAL_PRINTF("   0x%X  ", rtd_MSB);
+      SERIAL_ECHOPAIR(" : ", rtd_MSB);
+      SERIAL_ECHO("   RTD LSB : ");
+      SERIAL_PRINTF("   0x%X  ", rtd_LSB);
+      SERIAL_ECHOLNPAIR(" : ", rtd_LSB,"   ");
       SERIAL_ECHOLN();
     #endif
-  }
 
-  #if HAS_STM32_DEBUG || HAS_LPC1768_DEBUG
-    uint16_t rtd_MSB = rtd >> 8;
-    uint16_t rtd_LSB = rtd & 0x00FF;
-  #endif
-  #if HAS_STM32_DEBUG
-    Serial.println(" ");
-    Serial.print("RTD MSB : 0x");
-    Serial.print(rtd_MSB, HEX);
-    Serial.print("  : ");
-    Serial.print(rtd_MSB);
-    Serial.print("  RTD LSB : 0x");
-    Serial.print(rtd_LSB, HEX);
-    Serial.print("  : ");
-    Serial.println(rtd_LSB);
-    Serial.println(" ");
-  #endif
-  #if HAS_LPC1768_DEBUG
-    SERIAL_ECHOLN();
-    SERIAL_ECHO("RTD MSB : ");
-    SERIAL_PRINTF("   0x%X  ", rtd_MSB);
-    SERIAL_ECHOPAIR(" : ", rtd_MSB);
-    SERIAL_ECHO("   RTD LSB : ");
-    SERIAL_PRINTF("   0x%X  ", rtd_LSB);
-    SERIAL_ECHOLNPAIR(" : ", rtd_LSB,"   ");
-    SERIAL_ECHOLN();
-  #endif
+    return rtd;
 
-  return rtd;
+  #endif //end AVR_FLAG
 }
 
 /**********************************************/
@@ -666,95 +636,176 @@ uint16_t Adafruit_MAX31865::readRegister16(uint8_t addr) {
 
 void Adafruit_MAX31865::readRegisterN(uint8_t addr, uint8_t buffer[],
                                       uint8_t n) {
-  addr &= 0x7F; // make sure top bit is not set
+  #if AVR_FLAG
 
-  if (_sclk == -1 || __sclk == -1UL)
-    SPI.beginTransaction(max31865_spisettings);
-  else
-    if (!__pin_mapping)
-      digitalWrite(_sclk, LOW);
+    addr &= 0x7F; // make sure top bit is not set
+
+    if (_sclk == -1)
+      SPI.beginTransaction(max31865_spisettings);
     else
-      digitalWrite(__sclk, LOW);
+      digitalWrite(_sclk, LOW);
 
-  if (!__pin_mapping)
     digitalWrite(_cs, LOW);
-  else
-    digitalWrite(__cs, LOW);
 
+    spixfer(addr); //ga4
 
-  spixfer(addr);
+    // Serial.print("$"); Serial.print(addr, HEX); Serial.print(": ");
+    while (n--) {
+      buffer[0] = spixfer(0xFF);  //ga4
+      // Serial.print(" 0x"); Serial.print(buffer[0], HEX);
+      buffer++;
+    }
+    // Serial.println();
 
-  // Serial.print("$"); Serial.print(addr, HEX); Serial.print(": ");
-  while (n--) {
-    buffer[0] = spixfer(0xFF);
-    // Serial.print(" 0x"); Serial.print(buffer[0], HEX);
-    buffer++;
-  }
-  // Serial.println();
+    if (_sclk == -1)
+      SPI.endTransaction();
 
-  if (_sclk == -1 || __sclk == -1UL)
-    SPI.endTransaction();
-
-  if (!__pin_mapping)
     digitalWrite(_cs, HIGH);
-  else
-    digitalWrite(__cs, HIGH);
+
+  #else //AVR_FLAG
+
+    addr &= 0x7F; // make sure top bit is not set
+
+    if (_sclk == -1 || __sclk == -1UL)
+      SPI.beginTransaction(max31865_spisettings);
+    else
+      if (!__pin_mapping)
+        digitalWrite(_sclk, LOW);
+      else
+        digitalWrite(__sclk, LOW);
+
+    if (!__pin_mapping)
+      digitalWrite(_cs, LOW);
+    else
+      digitalWrite(__cs, LOW);
+
+
+    spixfer(addr);
+
+    // Serial.print("$"); Serial.print(addr, HEX); Serial.print(": ");
+    while (n--) {
+      buffer[0] = spixfer(0xFF);
+      // Serial.print(" 0x"); Serial.print(buffer[0], HEX);
+      buffer++;
+    }
+    // Serial.println();
+
+    if (_sclk == -1 || __sclk == -1UL)
+      SPI.endTransaction();
+
+    if (!__pin_mapping)
+      digitalWrite(_cs, HIGH);
+    else
+      digitalWrite(__cs, HIGH);
+
+  #endif  //end AVR_FLAG
 }
 
 void Adafruit_MAX31865::writeRegister8(uint8_t addr, uint8_t data) {
-  if (_sclk == -1 || __sclk == -1UL)
-    SPI.beginTransaction(max31865_spisettings);
-  else
-    if (!__pin_mapping)
-      digitalWrite(_sclk, LOW);
+  #if AVR_FLAG
+
+    if (_sclk == -1)
+      SPI.beginTransaction(max31865_spisettings);
     else
-      digitalWrite(__sclk, LOW);
+      digitalWrite(_sclk, LOW);
 
-  if (!__pin_mapping)
     digitalWrite(_cs, LOW);
-  else
-    digitalWrite(__cs, LOW);
 
-  spixfer(addr | 0x80); // make sure top bit is set
-  spixfer(data);
+    spixfer(addr | 0x80); // make sure top bit is set
+    spixfer(data);
 
-  // Serial.print("$"); Serial.print(addr, HEX); Serial.print(" = 0x");
-  // Serial.println(data, HEX);
+    // Serial.print("$"); Serial.print(addr, HEX); Serial.print(" = 0x");
+    // Serial.println(data, HEX);
 
-  if (_sclk == -1 || __sclk == -1UL)
-    SPI.endTransaction();
+    if (_sclk == -1)
+      SPI.endTransaction();
 
-  if (!__pin_mapping)
     digitalWrite(_cs, HIGH);
-  else
-    digitalWrite(__cs, HIGH);
+
+  #else //AVR_FLAG
+
+    if (_sclk == -1 || __sclk == -1UL)
+      SPI.beginTransaction(max31865_spisettings);
+    else
+      if (!__pin_mapping)
+        digitalWrite(_sclk, LOW);
+      else
+        digitalWrite(__sclk, LOW);
+
+    if (!__pin_mapping)
+      digitalWrite(_cs, LOW);
+    else
+      digitalWrite(__cs, LOW);
+
+    spixfer(addr | 0x80); // make sure top bit is set
+    spixfer(data);
+
+    // Serial.print("$"); Serial.print(addr, HEX); Serial.print(" = 0x");
+    // Serial.println(data, HEX);
+
+    if (_sclk == -1 || __sclk == -1UL)
+      SPI.endTransaction();
+
+    if (!__pin_mapping)
+      digitalWrite(_cs, HIGH);
+    else
+      digitalWrite(__cs, HIGH);
+
+  #endif //end AVR_FLAG
 }
 
 uint8_t Adafruit_MAX31865::spixfer(uint8_t x) {
-  if (_sclk == -1 || __sclk == -1UL)
-    return SPI.transfer(x);
+  #if AVR_FLAG
 
-  // software spi
-  // Serial.println("Software SPI");
-  uint8_t reply = 0;
+    if (_sclk == -1)
+      return SPI.transfer(x);
 
-  for (int i = 7; i >= 0; i--) {
-    reply <<= 1;
-    if (!__pin_mapping) {
+    // software spi
+    // Serial.println("Software SPI");
+    uint8_t reply = 0;
+
+    for (int i = 7; i >= 0; i--) {
+      reply <<= 1;
       digitalWrite(_sclk, HIGH);
       digitalWrite(_mosi, x & (1 << i));
       digitalWrite(_sclk, LOW);
       if (digitalRead(_miso))
         reply |= 1;
     }
-    else {
-      digitalWrite(__sclk, HIGH);
-      digitalWrite(__mosi, x & (1 << i));
-      digitalWrite(__sclk, LOW);
-      if (digitalRead(__miso))
-        reply |= 1;
-    }
-  }
 
-  return reply;
+    return reply;
+
+  #else //AVR_FLAG
+
+    if (_sclk == -1 || __sclk == -1UL)
+      return SPI.transfer(x);
+
+    // software spi
+    // Serial.println("Software SPI");
+    uint8_t reply = 0;
+
+    if (!__pin_mapping) {
+      for (int i = 7; i >= 0; i--) {
+        reply <<= 1;
+        digitalWrite(_sclk, HIGH);
+        digitalWrite(_mosi, x & (1 << i));
+        digitalWrite(_sclk, LOW);
+        if (digitalRead(_miso))
+          reply |= 1;
+      }
+    }
+    else {
+      for (int i = 7; i >= 0; i--) {
+        reply <<= 1;
+        digitalWrite(__sclk, HIGH);
+        digitalWrite(__mosi, x & (1 << i));
+        digitalWrite(__sclk, LOW);
+        if (digitalRead(__miso))
+          reply |= 1;
+      }
+    }
+
+    return reply;
+
+  #endif //end AVR_FLAG
 }
