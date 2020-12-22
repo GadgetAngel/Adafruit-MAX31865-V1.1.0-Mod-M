@@ -77,7 +77,7 @@ public:
 
   uint8_t readFault(void);
   void clearFault(void);
-  uint16_t readRTD(void);
+  uint16_t readRTD();
 
   void setWires(max31865_numwires_t wires);
   void autoConvert(bool b);
@@ -86,7 +86,7 @@ public:
 
   float temperature(float RTDnominal, float refResistor);
   uint16_t readRTD_Resistance(uint32_t refResistor);
-  uint16_t readRTD_with_Fault(void);
+  uint16_t readRTD_with_Fault();
 
 private:
   int8_t _sclk, _miso, _mosi, _cs;

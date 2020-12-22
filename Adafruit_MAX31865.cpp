@@ -77,7 +77,9 @@
     SPISettings(SPI_CLOCK_DIV4, MSBFIRST, MAX31865_SPI_MODE);
 #else
   static SPISettings max31865_spisettings =
-    SPISettings(500000, MSBFIRST, MAX31865_SPI_MODE);
+      SPISettings(500000, MSBFIRST, SPI_MODE1);
+  //static SPISettings max31865_spisettings =
+    //SPISettings(500000, MSBFIRST, MAX31865_SPI_MODE);
 #endif
 
 /**************************************************************************/
@@ -199,6 +201,10 @@ bool Adafruit_MAX31865::begin(max31865_numwires_t wires) {
   else {
     // start and configure hardware SPI
     SPI.begin();
+  }
+
+   for (uint8_t i = 0; i < 16; i++) {
+    // readRegister8(i);
   }
 
   setWires(wires);
@@ -544,7 +550,7 @@ uint16_t Adafruit_MAX31865::readRTD_Resistance(uint32_t refResistor) {
 */
 /**************************************************************************/
 uint16_t Adafruit_MAX31865::readRTD_with_Fault(void) {
-  uint16_t rtd;
+  uint16_t rtd = 0;
 
   clearFault();
   enableBias(true);
