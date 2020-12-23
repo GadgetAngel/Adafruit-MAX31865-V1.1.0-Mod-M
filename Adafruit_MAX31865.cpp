@@ -507,7 +507,7 @@ uint16_t Adafruit_MAX31865::readRTD(void) {
 
     clearFault();
     enableBias(true);
-    DELAY_US(10000)
+    DELAY_US(10000);
     uint8_t t = readRegister8(MAX31856_CONFIG_REG);
     t |= MAX31856_CONFIG_1SHOT;
     writeRegister8(MAX31856_CONFIG_REG, t);
